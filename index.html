@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Harness context engineering v5.0 | Global Prompt Optimization</title>
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Harness context engineering v5.0 - Global prompt optimizer and multi-model MCP tool server for GPT-5, o-series, Codex, Claude, and Gemini.">
+    <meta name="keywords" content="MCP, AI, Context, Optimization, GPT-5, o-series, Codex, RAG, tiktoken">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-dark: #0a0a0c;
+            --bg-card: rgba(255, 255, 255, 0.03);
+            --bg-accent: rgba(59, 130, 246, 0.1);
+            --primary: #3b82f6;
+            --primary-glow: rgba(59, 130, 246, 0.5);
+            --secondary: #10b981;
+            --accent: #8b5cf6;
+            --warning: #f59e0b;
+            --text-main: #f8fafc;
+            --text-dim: #94a3b8;
+            --border: rgba(255, 255, 255, 0.1);
+            --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* Smooth Scroll Presentation Layout */
+        .presentation {
+            height: 100vh;
+            overflow-y: auto;
+            scroll-snap-type: y mandatory;
+            scroll-behavior: smooth;
+        }
+
+        section {
+            height: 100vh;
+            width: 100%;
+            scroll-snap-align: start;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 4rem 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Background Decoration */
+        .bg-glow {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, var(--primary-glow) 0%, transparent 70%);
+            filter: blur(100px);
+            z-index: -1;
+            opacity: 0.2;
+            pointer-events: none;
+        }
+
+        .glow-1 { top: -10%; right: -10%; }
+        .glow-2 { bottom: -10%; left: -10%; background: radial-gradient(circle, rgba(139, 92, 246, 0.3) 0%, transparent 70%); }
+
+        /* Typography */
+        h1 {
+            font-size: clamp(3rem, 10vw, 5.5rem);
+            font-weight: 800;
+            background: linear-gradient(to right, #fff, #3b82f6, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+            letter-spacing: -0.02em;
+            text-align: center;
+        }
+
+        h2 {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 700;
+            margin-bottom: 2rem;
+            color: var(--text-main);
+            text-align: center;
+        }
+
+        .tagline {
+            font-size: 1.3rem;
+            color: var(--text-dim);
+            max-width: 900px;
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        /* Cards & Content */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 2rem;
+            backdrop-filter: blur(12px);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+            border-color: var(--primary);
+            background: rgba(255, 255, 255, 0.05);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+
+        .card h3 {
+            font-size: 1.3rem;
+            margin-bottom: 0.75rem;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .card p {
+            color: var(--text-dim);
+            font-size: 1rem;
+        }
+
+        /* Model Badges */
+        .model-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .model-pill {
+            font-size: 0.75rem;
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            color: var(--text-dim);
+        }
+
+        .model-pill.highlight {
+            border-color: var(--secondary);
+            color: var(--secondary);
+        }
+
+        /* Code Blocks */
+        code {
+            font-family: 'JetBrains Mono', monospace;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 0.2rem 0.5rem;
+            border-radius: 6px;
+            font-size: 0.9em;
+            color: var(--secondary);
+        }
+
+        .code-window {
+            background: #121214;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 800px;
+            padding: 1.5rem;
+            border: 1px solid var(--border);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            margin-top: 2rem;
+            text-align: left;
+            position: relative;
+        }
+
+        .code-window::before {
+            content: '•••';
+            position: absolute;
+            top: 10px;
+            left: 15px;
+            color: #444;
+            letter-spacing: 2px;
+            font-size: 1.2rem;
+        }
+
+        .code-content {
+            margin-top: 1.5rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: #d4d4d4;
+            white-space: pre-wrap;
+        }
+
+        .tools-section {
+            justify-content: flex-start;
+            overflow-y: auto;
+        }
+
+        .tools-section h2 {
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .tool-matrix {
+            width: 100%;
+            max-width: 1180px;
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.75rem;
+        }
+
+        .tool-row {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.9rem 1rem;
+            text-align: left;
+        }
+
+        .tool-name {
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--secondary);
+            font-size: 0.88rem;
+            margin-bottom: 0.35rem;
+        }
+
+        .tool-use {
+            color: var(--text-dim);
+            font-size: 0.88rem;
+        }
+
+        .example-grid {
+            width: 100%;
+            max-width: 1180px;
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .mini-code {
+            font-size: 0.72rem;
+            margin-top: 0;
+            padding: 1rem;
+        }
+
+        /* Navigation Dots */
+        .nav-dots {
+            position: fixed;
+            right: 2rem;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            z-index: 100;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border: 2px solid var(--border);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .dot.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            transform: scale(1.3);
+            box-shadow: 0 0 15px var(--primary-glow);
+        }
+
+        /* Badge */
+        .badge {
+            background: var(--bg-accent);
+            color: var(--primary);
+            padding: 0.4rem 1rem;
+            border-radius: 100px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 1rem;
+        }
+
+        footer {
+            position: absolute;
+            bottom: 2rem;
+            color: var(--text-dim);
+            font-size: 0.8rem;
+        }
+
+        @media (max-width: 768px) {
+            section { padding: 2rem 1rem; }
+            .grid { grid-template-columns: 1fr; }
+            .tool-matrix { grid-template-columns: 1fr; }
+            .example-grid { grid-template-columns: 1fr; }
+            .nav-dots { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="nav-dots" id="navDots">
+        <div class="dot active" data-target="slide-1"></div>
+        <div class="dot" data-target="slide-2"></div>
+        <div class="dot" data-target="slide-3"></div>
+        <div class="dot" data-target="slide-4"></div>
+        <div class="dot" data-target="slide-5"></div>
+        <div class="dot" data-target="slide-6"></div>
+    </div>
+
+    <main class="presentation" id="mainScroll">
+        
+        <!-- SLIDE 1: HERO -->
+        <section id="slide-1">
+            <div class="bg-glow glow-1"></div>
+            <div class="badge">Global Prompt Optimization</div>
+            <h1>Harness context engineering v5.0</h1>
+            <p class="tagline">Production-grade MCP context orchestration with global prompt caps, token savings telemetry, and multi-model budgeting.</p>
+            <div class="model-list" style="justify-content: center; max-width: 600px;">
+                <span class="model-pill highlight">GPT-5 (All)</span>
+                <span class="model-pill highlight">o1 / o3 / o4</span>
+                <span class="model-pill">GPT-4o</span>
+                <span class="model-pill">Codex-mini</span>
+                <span class="model-pill highlight">Claude 3.5+</span>
+                <span class="model-pill">Gemini 2.0+</span>
+            </div>
+            <footer>Scroll to explore the architecture ⚡️</footer>
+        </section>
+
+        <!-- SLIDE 2: TOKEN PRECISION -->
+        <section id="slide-2">
+            <div class="bg-glow glow-2"></div>
+            <h2>🎯 Precision Budgeting</h2>
+            <div class="grid">
+                <div class="card">
+                    <h3>tiktoken Engine</h3>
+                    <p>Uses <code>cl100k_base</code> for exact token counting. No more "len//4" heuristics — budget enforcement is now 99% accurate for OpenAI/Codex/o-series.</p>
+                </div>
+                <div class="card">
+                    <h3>Dynamic Registry</h3>
+                    <p>Integrated budget table for 20+ models. Handles "Reserved Reasoning" for o-series and "Context Windows" for GPT-5 (1M+ tok).</p>
+                </div>
+                <div class="card">
+                    <h3>Global Prompt Caps</h3>
+                    <p>Budgets apply to the final assembled prompt, including base prompt, retrieved context, memory, task query, and wrapper overhead.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 3: SMART RETRIEVAL -->
+        <section id="slide-3">
+            <h2>🔍 Provider-Aware Pipeline</h2>
+            <div class="tagline">One retrieval engine, infinite output formats.</div>
+            <div class="code-window">
+                <div class="code-content">Assembler Strategy:
+- Anthropic → Structured XML (<retrieved_context>)
+- OpenAI    → Clean Markdown (H3 Headings + Lang Fences)
+- Gemini    → Native JSON blocks
+- Codex     → Ultra-compact "// path [symbol]" format
+
+Compression:
+- High Density: Truncates methods to 30-60 lines
+- Symbol Aware: Keeps logic headers while removing verbosity</div>
+            </div>
+            <div class="grid" style="margin-top: 2rem;">
+                <div class="card">
+                    <h3>`memory_inject`</h3>
+                    <p>Compact memory format <code>[type|key] value</code> saves 60 tokens per entry vs XML.</p>
+                </div>
+                <div class="card">
+                    <h3>Hybrid Scoring</h3>
+                    <p>Semantic (LSA) + BM25 + Dependency Graph traversal for high-signal retrieval.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 4: HISTORY COMPACTION -->
+        <section id="slide-4">
+            <div class="bg-glow glow-1"></div>
+            <h2>🧠 Smart Compaction</h2>
+            <div class="grid">
+                <div class="card">
+                    <h3>`compact_conversation`</h3>
+                    <p>Summarizes 10+ turns into a single high-signal <code>&lt;conversation_summary&gt;</code> block. Supports Multimodal (images) and Tool Calls.</p>
+                </div>
+                <div class="card">
+                    <h3>Token-Capped Summaries</h3>
+                    <p>Summaries are automatically truncated by model family (e.g., 100 tok for Codex, 500 tok for Claude) to prevent context bloat.</p>
+                </div>
+                <div class="card">
+                    <h3>Retained Output Caps</h3>
+                    <p>Large retained tool/function outputs are token-capped so recent turns cannot keep raw logs or diffs indefinitely.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 5: LOGS & MONITORING -->
+        <section id="slide-5">
+            <h2>🛠 Enterprise-Ready Logs</h2>
+            <div class="tagline">Centralized monitoring at <code>~/.mcp-harness/harness-v3.log</code></div>
+            <div class="code-window" style="max-width: 700px;">
+                <div class="code-content" style="color: var(--secondary); font-size: 0.8rem;">$ tail -f ~/.mcp-harness/harness-v3.log
+[INFO] model='gpt-5.5' budget=1,000,000 inject=951,232 target=200,000
+[INFO] retrieve_context | query='optimize auth flow' | paths=['src/']
+[INFO]   prompt_optimizer | status=trimmed before=258,000 after=51,200 saved=206,800 saved_percent=80.2%
+[INFO] compact_messages | retain_turns=1 | summary_tokens=182 | before=85,000 after=41,000 saved=44,000 saved_percent=51.8%</div>
+            </div>
+            <div class="grid" style="margin-top: 2rem; grid-template-columns: repeat(3, 1fr);">
+                <div class="card" style="padding: 1.2rem;">
+                    <h3 style="font-size: 1rem;">Neutral Logs</h3>
+                    <p style="font-size: 0.85rem;">Stored in <code>~/.mcp-harness/</code></p>
+                </div>
+                <div class="card" style="padding: 1.2rem;">
+                    <h3 style="font-size: 1rem;">Legacy Symlink</h3>
+                    <p style="font-size: 0.85rem;">Works with <code>~/.gemini/</code> paths</p>
+                </div>
+                <div class="card" style="padding: 1.2rem;">
+                    <h3 style="font-size: 1rem;">Tiktoken OK</h3>
+                    <p style="font-size: 0.85rem;"><code>cl100k_base</code> integration</p>
+                </div>
+            </div>
+            <footer>Built by Harness context engineering team • v5.0 "Global Prompt Optimizer" Release</footer>
+        </section>
+
+        <!-- SLIDE 6: TOOL PLAYBOOK -->
+        <section id="slide-6" class="tools-section">
+            <h2>Tool Playbook</h2>
+            <div class="tagline">Descriptions, examples, and common use cases for the 13 MCP tools.</div>
+
+            <div class="tool-matrix">
+                <div class="tool-row">
+                    <div class="tool-name">retrieve_context</div>
+                    <div class="tool-use">Builds compressed RAG context from files. Use before debugging, refactoring, or explaining a module.</div>
+                </div>
+                <div class="tool-row">
+                    <div class="tool-name">compact_conversation</div>
+                    <div class="tool-use">Compacts long chat history into a summary block. Use before continuing long-running work.</div>
+                </div>
+                <div class="tool-row">
+                    <div class="tool-name">reindex_paths</div>
+                    <div class="tool-use">Refreshes the chunk index for changed paths. Use after large edits or newly created files.</div>
+                </div>
+                <div class="tool-row">
+                    <div class="tool-name">invalidate_cache</div>
+                    <div class="tool-use">Clears cached retrieval results. Use when output feels stale after branch or file changes.</div>
+                </div>
+                <div class="tool-row">
+                    <div class="tool-name">memory_save</div>
+                    <div class="tool-use">Stores decisions, project rules, and workflows in episodic, semantic, or procedural memory.</div>
+                </div>
+                <div class="tool-row">
+                    <div class="tool-name">memory_search</div>
+                    <div class="tool-use">Finds saved memory by meaning. Use to recover prior decisions before changing code.</div>
+                </div>
+                <div class="tool-row">
+                    <div class="tool-name">memory_inject</div>
+                    <div class="tool-use">Adds relevant memory to a prompt without file retrieval. Use for convention-heavy tasks.</div>
+                </div>
+                <div class="tool-row">
+                    <div class="tool-name">memory_delete</div>
+                    <div class="tool-use">Removes stale or wrong memory by key and type.</div>
+                </div>
+                <div class="tool-row">
+                    <div class="tool-name">memory_list</div>
+                    <div class="tool-use">Lists recent memory entries. Use for audits before cleanup.</div>
+                </div>
+                <div class="tool-row">
+                    <div class="tool-name">memory_evict</div>
+                    <div class="tool-use">Prunes least-used memory while keeping the most valuable entries.</div>
+                </div>
+                <div class="tool-row">
+                    <div class="tool-name">memory_stats</div>
+                    <div class="tool-use">Shows counts, tokens, and hits per memory tier.</div>
+                </div>
+                <div class="tool-row">
+                    <div class="tool-name">estimate_tokens</div>
+                    <div class="tool-use">Measures prompt size. Use before injecting long text into a model.</div>
+                </div>
+                <div class="tool-row">
+                    <div class="tool-name">get_token_budget</div>
+                    <div class="tool-use">Shows context window, reserves, and inject budget for a model.</div>
+                </div>
+            </div>
+
+            <div class="example-grid">
+                <div class="code-window mini-code">
+                    <div class="code-content">retrieve_context({
+  "base_prompt": "Use retrieved context.",
+  "paths": ["src/", "server.py"],
+  "query": "optimize auth flow",
+  "model": "gpt-5.5",
+  "output_mode": "structured"
+})</div>
+                </div>
+                <div class="code-window mini-code">
+                    <div class="code-content">compact_conversation({
+  "messages_json": "[{\"role\":\"user\",\"content\":\"...\"}]",
+  "retain_turns": 2,
+  "model": "gpt-5.5"
+})</div>
+                </div>
+                <div class="code-window mini-code">
+                    <div class="code-content">memory_save({
+  "key": "auth-refresh-token-policy",
+  "value": "Rotate refresh tokens after use.",
+  "mtype": "semantic",
+  "tags": "auth,security"
+})</div>
+                </div>
+                <div class="code-window mini-code">
+                    <div class="code-content">get_token_budget({
+  "model": "gpt-5.5"
+})
+
+reindex_paths({
+  "paths": ["src/auth/"]
+})</div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // Simple Scroll Spy for dots
+        const mainScroll = document.getElementById('mainScroll');
+        const dots = document.querySelectorAll('.dot');
+        const sections = document.querySelectorAll('section');
+
+        mainScroll.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (mainScroll.scrollTop >= (sectionTop - sectionHeight / 2)) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            dots.forEach(dot => {
+                dot.classList.remove('active');
+                if (dot.getAttribute('data-target') === current) {
+                    dot.classList.add('active');
+                }
+            });
+        });
+
+        dots.forEach(dot => {
+            dot.addEventListener('click', () => {
+                const targetId = dot.getAttribute('data-target');
+                document.getElementById(targetId).scrollIntoView({ behavior: 'smooth' });
+            });
+        });
+    </script>
+</body>
+</html>
